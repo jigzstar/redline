@@ -5,7 +5,7 @@
 production:
   adapter:  'mysql2'
   database: 'redminedb'
-  host:    '127.0.0.1'
+  host:    <%= ENV['MYSQL_SERVICE_HOST'] ? ENV['MYSQL_SERVICE_HOST'] : '172.30.211.85' %>
   username: 'userI3Y'
   password: 'NDY7V13a3QtkXQiT'
   port:     '3306'
