@@ -1,4 +1,5 @@
 /.project
+/.idea
 /.loadpath
 /.powrc
 /.rvmrc
@@ -6,6 +7,7 @@
 /config/configuration.yml
 /config/database.yml
 /config/email.yml
+/config/secrets.yml
 /config/initializers/session_store.rb
 /config/initializers/secret_token.rb
 /coverage
@@ -20,7 +22,7 @@
 /plugins/*
 !/plugins/README
 /public/dispatch.*
-/public/plugin_assets
+/public/plugin_assets/*
 /public/themes/*
 !/public/themes/alternate
 !/public/themes/classic
@@ -33,7 +35,6 @@
 /tmp/test/*
 /tmp/thumbnails/*
 /vendor/cache
-/vendor/rails
 *.rbc
 
 /.bundle
