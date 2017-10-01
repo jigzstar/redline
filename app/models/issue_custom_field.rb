@@ -1,5 +1,5 @@
 # Redmine - project management software
-# Copyright (C) 2006-2013  Jean-Philippe Lang
+# Copyright (C) 2006-2017  Jean-Philippe Lang
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -20,6 +20,9 @@ class IssueCustomField < CustomField
   has_and_belongs_to_many :trackers, :join_table => "#{table_name_prefix}custom_fields_trackers#{table_name_suffix}", :foreign_key => "custom_field_id"
   has_many :issues, :through => :issue_custom_values
 
+  safe_attributes 'project_ids',
+    'tracker_ids'
+
   def type_name
     :label_issue_plural
   end
@@ -28,13 +31,14 @@ class IssueCustomField < CustomField
     super || (roles & user.roles_for_project(project)).present?
   end
 
-  def visibility_by_project_condition(*args)
+  def visibility_by_project_condition(project_key=nil, user=User.current, id_column=nil)
     sql = super
-    additional_sql = "#{Issue.table_name}.tracker_id IN (SELECT tracker_id FROM #{table_name_prefix}custom_fields_trackers#{table_name_suffix} WHERE custom_field_id = #{id})"
-    unless is_for_all?
-      additional_sql << " AND #{Issue.table_name}.project_id IN (SELECT project_id FROM #{table_name_prefix}custom_fields_projects#{table_name_suffix} WHERE custom_field_id = #{id})"
-    end
-    "((#{sql}) AND (#{additional_sql}))"
+    id_column ||= id
+    tracker_condition = "#{Issue.table_name}.tracker_id IN (SELECT tracker_id FROM #{table_name_prefix}custom_fields_trackers#{table_name_suffix} WHERE custom_field_id = #{id_column})"
+    project_condition = "EXISTS (SELECT 1 FROM #{CustomField.table_name} ifa WHERE ifa.is_for_all = #{self.class.connection.quoted_true} AND ifa.id = #{id_column})" +
+      " OR #{Issue.table_name}.project_id IN (SELECT project_id FROM #{table_name_prefix}custom_fields_projects#{table_name_suffix} WHERE custom_field_id = #{id_column})"
+
+    "((#{sql}) AND (#{tracker_condition}) AND (#{project_condition}))"
   end
 
   def validate_custom_field
